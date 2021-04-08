@@ -1,0 +1,25 @@
+# This specifies a complete linux box w/ Anaconda, Python 3.9, Jupyter 
+#   notebooks, and basic data science packages.   It also includes vim
+#   and a sudo-enabled user account 'student'.
+
+#Build with $docker build -f "./Dockerfile" -t conda39:v0.1 . 
+#Run with $docker run -it <imageid>
+
+FROM  continuumio/conda-ci-linux-64-python3.9 as base
+WORKDIR /app
+COPY . .
+USER root 
+RUN ["apt-get", "install", "vim", "-y"]
+RUN ["/opt/conda/condabin/conda", "install", "jupyter", "seaborn", "numpy", "scipy", "-y"]
+
+# https://jupyter-notebook.readthedocs.io/en/stable/public_server.html
+# Add Tini. Tini operates as a process subreaper for jupyter. This prevents kernel crashes.
+ENV TINI_VERSION v0.6.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
+RUN chmod +x /usr/bin/tini
+
+
+FROM base as augmented
+RUN ["userdel", "-r", "test_user"]
+RUN echo "root:root" | chpasswd
+
