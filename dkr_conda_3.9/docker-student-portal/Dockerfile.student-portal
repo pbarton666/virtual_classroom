@@ -1,0 +1,49 @@
+# This builds on the linux/conda/python box and adds Jupyter Notebook
+#   server on port 8888.
+
+#Build with $docker build -f "./Dockerfile" -t student .
+# $docker run -it --entrypoint /bin/bash student  # shell as student
+# docker run -it -v C:\Users\pat\Documents\patfiles\python_related\vclass\dkr_conda_3.9\src:/home/student --entrypoint /bin/bash student
+# $docker run <same volume stuff> -p 7000:8888 student  # Jupyter server: 7000 | any unallocated host port
+# Course files in container /src/course_files mapped to local ./course_files.
+#   Edit locally and run against the data science stack in the container.
+
+FROM py39-ds-stack 
+
+USER root
+
+WORKDIR /home
+RUN useradd -ms /bin/bash student
+RUN echo 'student:student' | chpasswd
+RUN echo 'root:root' | chpasswd 
+RUN adduser student sudo
+
+RUN chmod -R +rwx /home/student
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+USER student
+WORKDIR /home/student/course_files
+COPY . /home/student/src/course_files
+
+# These security shortcuts allow Docker and Jupiter work easily
+#   with mapped file systems in a teaching environment.  Do not 
+#   use for anything sensitive.
+
+# Allows files w/ permissions other than 600 to be trusted.  This prevents
+#   the kernal from crashing due to permissions issues when running with
+#   a Windows host and bound directories.  
+ENV JUPYTER_ALLOW_INSECURE_WRITES true
+
+# Use container's /tmp dir for housekeeping files.  File system owners and 
+#    permissions are immutable within most of the container.
+ENV JUPYTER_RUNTIME_DIR /tmp
+
+# Disables requirement to use a security token and starts notebook server
+CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root", "--NotebookApp.token=''"]
+
+# A few args for docker compose (not necessarily all used)
+ARG gitcommithash
+ARG buildno
+ARG hostportjupyter
+ARG hostportdb

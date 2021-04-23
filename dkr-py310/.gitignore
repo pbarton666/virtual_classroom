@@ -1,0 +1,8 @@
+.ipynb*
+.ipython
+.jupyter
+.local
+.bash_history
+.cache
+Untitled*
+logs*

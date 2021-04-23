@@ -1,0 +1,19 @@
+
+
+version: "3.8"
+services:
+  py39-ds-stack:
+    build:
+      context: ./docker-py39-ds-stack
+      dockerfile: Dockerfile.py39-ds-stack
+    image: py39-ds-stack
+
+  student-portal:
+    build:
+      context: ./docker-student-portal
+      dockerfile: Dockerfile.student-portal
+      ports: 
+       - "8888:8888"
+    image: student-portal
+    volumes:
+      - ./course_files:/src/course_files

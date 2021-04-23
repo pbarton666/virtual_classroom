@@ -1,0 +1,21 @@
+# This specifies a complete linux Debian box w/ Python 3.10 with jupyter and numpy.  
+
+FROM python:rc-buster
+
+WORKDIR /app
+COPY . .
+USER root 
+RUN ["apt-get", "update" ]
+RUN ["apt-get", "install", "build-essential", "vim", "-y"]
+RUN ["pip", "install", "pyzmq"]
+RUN ["python", "-m", "pip", "install", "jupyter"]
+RUN ["pip", "install", "numpy==1.19.1"]
+RUN ["pip", "install", "matplotlib"]
+# https://jupyter-notebook.readthedocs.io/en/stable/public_server.html
+# Add Tini. Tini operates as a process subreaper for jupyter. This prevents kernel crashes.
+ENV TINI_VERSION v0.6.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
+RUN chmod +x /usr/bin/tini
+
+RUN echo "root:root" | chpasswd
+

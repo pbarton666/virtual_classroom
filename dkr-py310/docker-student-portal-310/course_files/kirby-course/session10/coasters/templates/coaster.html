@@ -1,0 +1,23 @@
+{% extends "master.html" %}
+{% block the_table %}
+<h4>Coaster:</h4>
+<table>
+<tr><td>Name:</td><td>{{the_data[0]}}</td></tr>
+<tr><td>Park:</td><td> {{the_data[1]}} </td></tr>
+<tr><td>State:</td><td> {{the_data[2]}} </td></tr>
+<tr><td>Country:</td><td> {{the_data[3]}} </td></tr>
+<tr><td>Duration:</td><td> {{the_data[4]}} </td></tr> 
+<tr><td>Speed:</td><td> {{the_data[5]}} </td></tr>
+<tr><td>Height:</td><td> {{the_data[6]}} </td></tr>
+<tr><td>VertDrop:</td><td> {{the_data[7]}} </td></tr> 
+<tr><td>Length:</td><td> {{the_data[8]}} </td></tr> 
+<tr><td>Yr_Opened:</td><td> {{the_data[9]}} </td></tr>
+<tr><td>Inversions:</td><td> {{the_data[10]}} </td></tr>
+<tr><td>
+<input type="button" onclick="window.open('/update/{{the_data[-1]}}', '_self')" value="Edit"> 
+<input type="button" onclick="delcoaster('{{the_data[-1]}}')" value="Delete">
+</td><td>
+<input type="button" onclick="window.open('/coasters', '_self')" value="List">
+</td></tr>
+</table>
+{% endblock %}

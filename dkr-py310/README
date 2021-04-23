@@ -1,0 +1,17 @@
+This repo contains Docker configurations to virtual programming courses.
+
+dkr_conda_3.9 produces a conda-based Python 3.9 data science stack built from the
+included requirements.txt, a Jupyter notebook server, and course files linked to
+a git repo.   The container can be accesed via a bash terminal for command line
+access or via a local browser.
+
+dkr-py310 produces a Python 3.10 partial data science stack using a release candidate
+for 3.10, numpy, and Jupyter. Many other libraries like scipy and pandas are not yet
+compatible (as of 20 April 2021).
+
+The images should "just work" with minor configurations on the students' machines.
+They'll need to:
+    - install Docker Desktop
+    - if on Windows, allow permission via Docker Desktop to access their directories
+    - set up directories on their machines to contain course folders
+    - access course files with the editor of their choice.

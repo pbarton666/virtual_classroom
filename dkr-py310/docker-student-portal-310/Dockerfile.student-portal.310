@@ -1,0 +1,67 @@
+# This builds on the linux/python, adds a user 'student', clones a course content repo, and optionally
+#    starts a Jupyter Notebook server on contain port 8888, mapped to a local port.  The local computer
+#    accesses the notebook via http://localhost:7000 (or whatever port is specified below).
+
+#Build with this command (don't forget the trailing '.'):
+#   $docker build -f "./Dockerfile.student-portal.310" -t student .
+#
+#Once built, the container can be run in a variety of ways.
+
+#Get a bash shell into the 'student' user's home directory:
+#   $docker run -it --entrypoint /bin/bash student  # shell as student
+#Get the same bash shell with a local directory (fill in your own) mapped to the student dir:
+#   $docker run -it -v C:\Users\pat\Documents\patfiles\python_related\vclass\dkr-py310\src:/home/student --entrypoint /bin/bash student
+#Start in daemon mode with notebook serving on local port 7000 (or fill in your own port)
+#   $docker run -p 7000:8888 -v C:\Users\pat\Documents\patfiles\python_related\vclass\dkr-py310\src:/home/student student  
+#
+# The course files can be editied in the local directory.  Changes are reflected in the container. 
+#   Edit locally and run against the data science stack in the container.
+#
+# When building, the directory containing this file must also contain a 'course_files' directory
+#   that contains any files included for student use.  It can be a git repo, if desired.  This
+#   gets mapped to /home/student/course_files in the container.
+#
+# If the student is using a Windows system, they need to use Docker Desktop .. settings .. 
+#   resources .. File Sharing to allow access to whatever local directory they map to the 
+#   container's /home/student/course_files directory.  This won't necessarily be obvious to them. 
+#
+FROM py310 
+
+USER root
+
+WORKDIR /home
+RUN useradd -ms /bin/bash student
+RUN echo 'student:student' | chpasswd
+RUN echo 'root:root' | chpasswd 
+RUN adduser student sudo
+
+RUN chmod -R +rwx /home/student
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+USER student
+WORKDIR /home/student
+COPY ./course_files /home/student/course_files
+COPY ./student_workspace /home/student/student_workspace
+
+# These security shortcuts allow Docker and Jupiter work easily
+#   with mapped file systems in a teaching environment.  Do not 
+#   use for anything sensitive.
+
+# Allows files w/ permissions other than 600 to be trusted.  This prevents
+#   the kernal from crashing due to permissions issues when running with
+#   a Windows host and bound directories.  
+ENV JUPYTER_ALLOW_INSECURE_WRITES true
+
+# Use container's /tmp dir for housekeeping files.  File system owners and 
+#    permissions are immutable within most of the container.
+ENV JUPYTER_RUNTIME_DIR /tmp
+
+# Disables requirement to use a security token and starts notebook server
+CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root", "--NotebookApp.token=''"]
+
+# A few args for docker compose (not yet implemented)
+ARG gitcommithash
+ARG buildno
+ARG hostportjupyter
+ARG hostportdb
